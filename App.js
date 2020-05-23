@@ -8,12 +8,27 @@ import AddTodo from './src/screens/AddTodo';
 
 class App extends Component {
   state = {
-    modalOpen: false
+    modalOpen: false,
+    lists: data
   }
 
 toggleModal = () => {
   this.setState({modalOpen: !this.state.modalOpen})
 }
+
+addList = list => {
+  const lists = this.state.lists
+  this.setState({lists: [...lists, {...list, id: lists.length + 1, todos: []}]})
+}
+
+updateList = list => {
+  const lists = this.state.lists
+  this.setState({lists: lists.map(item => item.id === list.id ? list : item)})
+}
+
+renderList = (list) => (
+  <TodoList list={list} updateList={this.updateList} />
+)
 
   render(){
     return (
@@ -24,7 +39,7 @@ toggleModal = () => {
           onRequestClose={this.toggleModal}
           >
          
-           <AddTodo toggleModal={this.toggleModal} />
+           <AddTodo toggleModal={this.toggleModal} addList={this.addList} />
          
         </Modal>
         <View style={styles.headerContainer}>
@@ -44,13 +59,13 @@ toggleModal = () => {
 
         <View style={{height: 275, paddingLeft: 32}}>
           <FlatList 
-          data={data}
-          renderItem={({item}) => (
-           <TodoList list={item} />
-          ) } 
+          data={this.state.lists}
+          renderItem={({item}) => this.renderList(item) } 
           keyExtractor={item => item.name} 
           horizontal={true} 
-          showsHorizontalScrollIndicator={false} />
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+          />
         </View>
 
       </View>

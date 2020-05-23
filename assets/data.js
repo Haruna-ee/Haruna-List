@@ -1,4 +1,5 @@
 export default data = [{
+        id: 1,
         name: "Plan a trip",
         color: "#24a6d9",
         todos: [{
@@ -19,6 +20,7 @@ export default data = [{
         ]
     },
     {
+        id: 2,
         name: "Errands",
         color: "#8022d9",
         todos: [{
@@ -38,7 +40,7 @@ export default data = [{
             }
         ]
     },
-    {
+    {   id: 3,
         name: "Write Thesis",
         color: "#82424b",
         todos: [{

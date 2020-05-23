@@ -6,12 +6,14 @@ import { colors, backgroundColors } from '../../utils'
 import data from '../../assets/data'
 
 
-const AddTodo = ({toggleModal}) => {
+const AddTodo = ({toggleModal, addList}) => {
     const [name, setText] = useState("")
     const [color, setColor] = useState(backgroundColors[0])
 
     const addTodo = () => {
-        data.push({name, color, todos: []})
+        //data.push({name, color, todos: []})
+        const list = {name, color}
+        addList(list)
         setText("")
         toggleModal()
     }
