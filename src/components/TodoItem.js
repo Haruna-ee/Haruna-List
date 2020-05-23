@@ -6,7 +6,8 @@ import { StyleSheet,
     FlatList, 
     KeyboardAvoidingView, 
     TextInput,
-    Keyboard
+    Keyboard,
+    Alert
 }  from 'react-native'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import { colors } from '../../utils'
@@ -15,7 +16,7 @@ const TodoItem = ({list, toggleListModal, updateList}) => {
     const [newTodo, setNewTodo] = useState("")
     const totalCount = list.todos.length
     const completed = list.todos.filter(todo => todo.completed).length
-    const remaining = totalCount - completed
+    
 
     const toggleTodoCompleted = index => {
         let currentList = list
@@ -33,8 +34,38 @@ const TodoItem = ({list, toggleListModal, updateList}) => {
         Keyboard.dismiss()
     }
 
+    const deleteTodod = (index) => {
+        let currentList = list;
+       
+        Alert.alert(
+            "Delete",
+            "Are you sure you want to delete this todo?",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "OK",
+                onPress: () => {
+                    currentList.todos.splice(index, 1) 
+                    updateList(currentList)
+                },
+              },
+            ],
+            { cancelable: true }
+          );
+    }
+
+ 
+
     const renderList = (todo, index) => (
+       
         <View style={styles.todoContainer}>
+            <TouchableOpacity style={[styles.deleteBtn]} onPress={()=> deleteTodod(index)}>
+                <AntDesign name="delete" size={16} color={colors.red}  />
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => toggleTodoCompleted(index)}>
                 <Ionicons 
                   name={todo.completed ? "ios-square" : "ios-square-outline"} 
@@ -42,13 +73,16 @@ const TodoItem = ({list, toggleListModal, updateList}) => {
                   color={colors.grey} 
                   style={{width:32}} />
             </TouchableOpacity>
+            
             <Text 
               style={[styles.todo, {color: todo.completed ? colors.grey : colors.black, 
                     textDecorationLine: todo.completed ? "line-through": "none",}
                     ]}>
                 {todo.title}
             </Text>
+           
         </View>
+       
     )
     
     return (
@@ -67,7 +101,7 @@ const TodoItem = ({list, toggleListModal, updateList}) => {
                 <FlatList 
                   data={list.todos}
                   renderItem={({item, index}) => renderList(item, index) } 
-                  keyExtractor={item => item.title}
+                  keyExtractor={(_, index) => index.toString()}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{paddingHorizontal:32, paddingVertical: 64}}
                 />
@@ -127,6 +161,14 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         justifyContent: "center",
         alignItems: "center"
+    },
+
+    deleteBtn: {
+        borderRadius: 4,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 40
+        //alignSelf: "flex-end"
     },
     todo: {
         color: colors.black,

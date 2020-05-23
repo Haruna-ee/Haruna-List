@@ -1,16 +1,40 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, View , TouchableOpacity, FlatList, Modal} from 'react-native';
+import { StyleSheet, Text, View , TouchableOpacity, FlatList, Modal, ActivityIndicator} from 'react-native';
 import { colors } from './utils';
 import {AntDesign} from "@expo/vector-icons"
-import data from './assets/data';
 import TodoList from './src/components/TodoList';
 import AddTodo from './src/screens/AddTodo';
+import Fire from './firebase';
 
 class App extends Component {
   state = {
     modalOpen: false,
-    lists: data
+    lists: [],
+    user: {},
+    loading: true
   }
+
+
+ componentDidMount(){
+   firebase = new Fire((error, user) => {
+     if (error) {
+      return alert("Sorry, something went wrong")
+     }
+
+     firebase.getTodoList(lists => {
+       this.setState({lists, user}, () => {
+         this.setState({loading: false})
+       })
+     })
+
+     this.setState({user})
+  
+   })
+ } 
+
+ componentWillUnmount(){
+   firebase.detach()
+ }
 
 toggleModal = () => {
   this.setState({modalOpen: !this.state.modalOpen})
@@ -18,12 +42,18 @@ toggleModal = () => {
 
 addList = list => {
   const lists = this.state.lists
-  this.setState({lists: [...lists, {...list, id: lists.length + 1, todos: []}]})
+  //this.setState({lists: [...lists, {...list, id: lists.length + 1, todos: []}]})
+  firebase.addList({
+    name: list.name,
+    color: list.color,
+    todos: []
+  })
 }
 
 updateList = list => {
   const lists = this.state.lists
-  this.setState({lists: lists.map(item => item.id === list.id ? list : item)})
+  //this.setState({lists: lists.map(item => item.id === list.id ? list : item)})
+  firebase.updateList(list)
 }
 
 renderList = (list) => (
@@ -31,6 +61,15 @@ renderList = (list) => (
 )
 
   render(){
+
+    if (this.state.loading) {
+      return (
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color={colors.blue} />
+        </View>
+      )
+    }
+
     return (
       <View style={styles.container}>
         <Modal 
@@ -42,6 +81,7 @@ renderList = (list) => (
            <AddTodo toggleModal={this.toggleModal} addList={this.addList} />
          
         </Modal>
+       
         <View style={styles.headerContainer}>
           <View  style={styles.divider}/>
           <Text style={styles.title}>
@@ -61,7 +101,7 @@ renderList = (list) => (
           <FlatList 
           data={this.state.lists}
           renderItem={({item}) => this.renderList(item) } 
-          keyExtractor={item => item.name} 
+          keyExtractor={item => item.id.toString()} 
           horizontal={true} 
           showsHorizontalScrollIndicator={false}
           keyboardShouldPersistTaps="always"
